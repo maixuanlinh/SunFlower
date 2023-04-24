@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.app.ShareCompat
 import androidx.core.widget.NestedScrollView
@@ -29,11 +30,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.maixuanlinh.sunflower.R
 import com.maixuanlinh.sunflower.data.Plant
 import com.maixuanlinh.sunflower.databinding.FragmentPlantDetailBinding
+import com.maixuanlinh.sunflower.sunflower.plantdetail.PlantDetailDescription
 import com.maixuanlinh.sunflower.utilities.InjectorUtils
 import com.maixuanlinh.sunflower.viewmodels.PlantDetailViewModel
 
@@ -61,6 +64,11 @@ class PlantDetailFragment : Fragment() {
         ).apply {
             viewModel = plantDetailViewModel
             lifecycleOwner = viewLifecycleOwner
+            //In the given code, Callback is an interface that defines a single function add which takes an argument of type Plant and returns nothing.
+            //
+            //The line callback = object : Callback creates an object of an anonymous class that implements the Callback interface. This object is then assigned to the callback property of the binding object using the = operator.
+            //
+            //By doing this, the callback property now references an object that can be used to invoke the add function defined in the Callback interface
             callback = object : Callback {
                 override fun add(plant: Plant?) {
                     plant?.let {
@@ -107,6 +115,25 @@ class PlantDetailFragment : Fragment() {
                         true
                     }
                     else -> false
+                }
+            }
+
+            composeView.apply {
+                // By default, the Composition is disposed when ComposeView is detached
+                // from the window. This causes problems during transitions as the ComposeView
+                // will still be visible on the screen after it's detached from the window.
+                // Instead, to dispose the Composition when the Fragment view lifecycle is
+                // destroyed, we set the DisposeOnViewTreeLifecycleDestroyed strategy as the
+                // ViewCompositionStrategy for this ComposeView
+                setViewCompositionStrategy(
+                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                )
+
+                // Add Jetpack Compose content to this View
+                setContent {
+                    MdcTheme {
+                        PlantDetailDescription(plantDetailViewModel)
+                    }
                 }
             }
         }
